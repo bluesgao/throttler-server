@@ -4,10 +4,8 @@ import com.bluesgao.throttlerserver.anno.RateLimit;
 import com.bluesgao.throttlerserver.anno.RateLimitType;
 import com.bluesgao.throttlerserver.service.RateLimitService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
@@ -16,6 +14,9 @@ import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.Collections;
 
+/**
+ * https://www.cnblogs.com/better-farther-world2099/articles/12197103.html
+ */
 @Slf4j
 @Service
 public class RateLimitServiceImpl implements RateLimitService {
@@ -27,13 +28,13 @@ public class RateLimitServiceImpl implements RateLimitService {
 
     static {
         DefaultRedisScript redisScript = new DefaultRedisScript();
-        redisScript.setLocation(new ClassPathResource("/lua/tps.lua"));
+        redisScript.setLocation(new ClassPathResource("/lua/demo.lua"));
         redisScript.setResultType(Long.class);
         tpsLuaScript = redisScript;
     }
 
     private Boolean acquireToken(String key, RateLimit rateLimit) {
-        Long ret = redisTemplate.execute(tpsLuaScript, Collections.singletonList(rateLimit.key()), rateLimit.count(), rateLimit.time());
+        Long ret = redisTemplate.execute(tpsLuaScript, Collections.singletonList(key + rateLimit.key()), rateLimit.count(), rateLimit.time());
         if (ret != null && ret.longValue() <= rateLimit.count()) {
             return true;
         }
@@ -41,7 +42,7 @@ public class RateLimitServiceImpl implements RateLimitService {
     }
 
     private Boolean acquireThreshold(String key, RateLimit rateLimit) {
-        Long ret = redisTemplate.execute(tpsLuaScript, Collections.singletonList(rateLimit.key()), rateLimit.count(), rateLimit.time());
+        Long ret = redisTemplate.execute(tpsLuaScript, Collections.singletonList(key + rateLimit.key()), rateLimit.count(), rateLimit.time());
         if (ret != null && ret.longValue() <= rateLimit.count()) {
             return true;
         }
