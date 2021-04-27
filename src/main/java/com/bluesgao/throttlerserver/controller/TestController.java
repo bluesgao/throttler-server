@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @GetMapping("/user/{name}")
-    @RateLimit(type = RateLimitType.THRESHOLD, time = 1, count = 10)
+    @RateLimit(key = "user", type = RateLimitType.THRESHOLD, time = 60, count = 1000)
     @ResponseBody
     public CommonResult<String> user(@PathVariable String name) {
         log.info("user:" + name);

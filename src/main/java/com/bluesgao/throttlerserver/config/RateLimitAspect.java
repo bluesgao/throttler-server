@@ -30,7 +30,7 @@ public class RateLimitAspect {
         RateLimit rateLimit = method.getAnnotation(RateLimit.class);
 
         if (rateLimit != null) {
-            if (rateLimitService.throttle(targetClass.getSimpleName() + ":" + method.getName(), rateLimit)) {
+            if (rateLimitService.throttle("rateLimit:", rateLimit)) {
                 log.info("限流时间段内访问");
                 return joinPoint.proceed();
             }
